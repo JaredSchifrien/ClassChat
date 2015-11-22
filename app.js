@@ -32,6 +32,7 @@ var connection = new Connection(config);
 connection.on('connect', function(err) {
 // If no error, then good to proceed.
     console.log("Connected");
+    //executeStatement();
 });
 
 app.use(express.static('public'));
@@ -42,16 +43,24 @@ app.set('view engine', 'ejs');
 app.get('/', function (request, response) {
 
   gateway.clientToken.generate({}, function (err, res) {
-    /*response.render('index', {
-      clientToken: res.clientToken
-    });*/
+
     response.render('classchat');
   });
 
 });
 
 app.post('/myaction', parseUrlEnconded, function(req, res) {
-  res.send('You sent the name "' + req.body.name + '".');
+  
+  var request = new Request(
+        "INSERT INTO users (name, class) VALUES ("+req.body.name+", "+req.body.class+");", function(err) {
+    if (err) {
+        console.log(err);} 
+    });
+    
+    connection.execSql(request);
+  
+  res.send('You sent the name "' + req.body.name + '" who is in the class '+req.body.class+'.');
+  
 });
 
 app.listen(3000, function () {
@@ -63,7 +72,7 @@ module.exports = app;
 function executeStatement() {
     
     var request = new Request(
-        "CREATE TABLE celebs (id INTEGER, name TEXT, age INTEGER);", function(err) {
+        "CREATE TABLE users (name TEXT, class TEXT);", function(err) {
     if (err) {
         console.log(err);} 
     });
